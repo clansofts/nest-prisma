@@ -1,0 +1,10 @@
+{
+  "type": "mysql",
+  "host": "localhost",
+  "port": 3306,
+  "username": "iamclaytonray",
+  "password": "password",
+  "database": "nest-prisma",
+  "entities": ["build/**/**.entity{.ts,.js}"],
+  "synchronize": true
+}
