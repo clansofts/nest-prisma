@@ -16,3 +16,13 @@ seed:
   import: seed.graphql
 
 cluster: ${env:PRISMA_CLUSTER}
+
+
+# service: nest-prisma
+# stage: dev
+
+# datamodel: datamodel.graphql
+
+# secret: sudo
+# disableAuth: false
+# cluster: clayton-ray/prisma-us1

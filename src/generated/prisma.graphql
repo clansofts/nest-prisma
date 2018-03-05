@@ -9,18 +9,9 @@ type Post implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  isPublished: Boolean!
+  published: Boolean! @default(value: "false")
   title: String!
-  text: String!
-  author(where: UserWhereInput): User!
-}
-
-type User implements Node {
-  id: ID!
-  email: String!
-  password: String!
-  name: String!
-  posts(where: PostWhereInput, orderBy: PostOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Post!]
+  body: String!
 }
 
 
@@ -32,31 +23,28 @@ type AggregatePost {
   count: Int!
 }
 
-type AggregateUser {
-  count: Int!
-}
-
 type BatchPayload {
+  """
+  The number of nodes that have been affected by the Batch operation.
+  """
   count: Long!
 }
 
 scalar DateTime
 
+"""
+The `Long` scalar type represents non-fractional signed whole numeric values.
+Long can represent values between -(2^63) and 2^63 - 1.
+"""
 scalar Long
 
 type Mutation {
   createPost(data: PostCreateInput!): Post!
-  createUser(data: UserCreateInput!): User!
   updatePost(data: PostUpdateInput!, where: PostWhereUniqueInput!): Post
-  updateUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
   deletePost(where: PostWhereUniqueInput!): Post
-  deleteUser(where: UserWhereUniqueInput!): User
   upsertPost(where: PostWhereUniqueInput!, create: PostCreateInput!, update: PostUpdateInput!): Post!
-  upsertUser(where: UserWhereUniqueInput!, create: UserCreateInput!, update: UserUpdateInput!): User!
   updateManyPosts(data: PostUpdateInput!, where: PostWhereInput!): BatchPayload!
-  updateManyUsers(data: UserUpdateInput!, where: UserWhereInput!): BatchPayload!
   deleteManyPosts(where: PostWhereInput!): BatchPayload!
-  deleteManyUsers(where: UserWhereInput!): BatchPayload!
 }
 
 enum MutationType {
@@ -65,43 +53,70 @@ enum MutationType {
   DELETED
 }
 
+"""
+An object with an ID
+"""
 interface Node {
+  """
+  The id of the object.
+  """
   id: ID!
 }
 
+"""
+Information about pagination in a connection.
+"""
 type PageInfo {
+  """
+  When paginating forwards, are there more items?
+  """
   hasNextPage: Boolean!
+  """
+  When paginating backwards, are there more items?
+  """
   hasPreviousPage: Boolean!
+  """
+  When paginating backwards, the cursor to continue.
+  """
   startCursor: String
+  """
+  When paginating forwards, the cursor to continue.
+  """
   endCursor: String
 }
 
+"""
+A connection to a list of items.
+"""
 type PostConnection {
+  """
+  Information to aid in pagination.
+  """
   pageInfo: PageInfo!
+  """
+  A list of edges.
+  """
   edges: [PostEdge]!
   aggregate: AggregatePost!
 }
 
 input PostCreateInput {
-  isPublished: Boolean
+  published: Boolean
   title: String!
-  text: String!
-  author: UserCreateOneWithoutPostsInput!
+  body: String!
 }
 
-input PostCreateManyWithoutAuthorInput {
-  create: [PostCreateWithoutAuthorInput!]
-  connect: [PostWhereUniqueInput!]
-}
-
-input PostCreateWithoutAuthorInput {
-  isPublished: Boolean
-  title: String!
-  text: String!
-}
-
+"""
+An edge in a connection.
+"""
 type PostEdge {
+  """
+  The item at the end of the edge.
+  """
   node: Post!
+  """
+  A cursor for use in pagination.
+  """
   cursor: String!
 }
 
@@ -112,21 +127,21 @@ enum PostOrderByInput {
   createdAt_DESC
   updatedAt_ASC
   updatedAt_DESC
-  isPublished_ASC
-  isPublished_DESC
+  published_ASC
+  published_DESC
   title_ASC
   title_DESC
-  text_ASC
-  text_DESC
+  body_ASC
+  body_DESC
 }
 
 type PostPreviousValues {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  isPublished: Boolean!
+  published: Boolean!
   title: String!
-  text: String!
+  body: String!
 }
 
 type PostSubscriptionPayload {
@@ -137,112 +152,270 @@ type PostSubscriptionPayload {
 }
 
 input PostSubscriptionWhereInput {
+  """
+  Logical AND on all given filters.
+  """
   AND: [PostSubscriptionWhereInput!]
+  """
+  Logical OR on all given filters.
+  """
   OR: [PostSubscriptionWhereInput!]
+  """
+  The subscription event gets dispatched when it's listed in mutation_in
+  """
   mutation_in: [MutationType!]
+  """
+  The subscription event gets only dispatched when one of the updated fields names is included in this list
+  """
   updatedFields_contains: String
+  """
+  The subscription event gets only dispatched when all of the field names included in this list have been updated
+  """
   updatedFields_contains_every: [String!]
+  """
+  The subscription event gets only dispatched when some of the field names included in this list have been updated
+  """
   updatedFields_contains_some: [String!]
   node: PostWhereInput
 }
 
 input PostUpdateInput {
-  isPublished: Boolean
+  published: Boolean
   title: String
-  text: String
-  author: UserUpdateOneWithoutPostsInput
-}
-
-input PostUpdateManyWithoutAuthorInput {
-  create: [PostCreateWithoutAuthorInput!]
-  connect: [PostWhereUniqueInput!]
-  disconnect: [PostWhereUniqueInput!]
-  delete: [PostWhereUniqueInput!]
-  update: [PostUpdateWithoutAuthorInput!]
-  upsert: [PostUpsertWithoutAuthorInput!]
-}
-
-input PostUpdateWithoutAuthorDataInput {
-  isPublished: Boolean
-  title: String
-  text: String
-}
-
-input PostUpdateWithoutAuthorInput {
-  where: PostWhereUniqueInput!
-  data: PostUpdateWithoutAuthorDataInput!
-}
-
-input PostUpsertWithoutAuthorInput {
-  where: PostWhereUniqueInput!
-  update: PostUpdateWithoutAuthorDataInput!
-  create: PostCreateWithoutAuthorInput!
+  body: String
 }
 
 input PostWhereInput {
+  """
+  Logical AND on all given filters.
+  """
   AND: [PostWhereInput!]
+  """
+  Logical OR on all given filters.
+  """
   OR: [PostWhereInput!]
   id: ID
+  """
+  All values that are not equal to given value.
+  """
   id_not: ID
+  """
+  All values that are contained in given list.
+  """
   id_in: [ID!]
+  """
+  All values that are not contained in given list.
+  """
   id_not_in: [ID!]
+  """
+  All values less than the given value.
+  """
   id_lt: ID
+  """
+  All values less than or equal the given value.
+  """
   id_lte: ID
+  """
+  All values greater than the given value.
+  """
   id_gt: ID
+  """
+  All values greater than or equal the given value.
+  """
   id_gte: ID
+  """
+  All values containing the given string.
+  """
   id_contains: ID
+  """
+  All values not containing the given string.
+  """
   id_not_contains: ID
+  """
+  All values starting with the given string.
+  """
   id_starts_with: ID
+  """
+  All values not starting with the given string.
+  """
   id_not_starts_with: ID
+  """
+  All values ending with the given string.
+  """
   id_ends_with: ID
+  """
+  All values not ending with the given string.
+  """
   id_not_ends_with: ID
   createdAt: DateTime
+  """
+  All values that are not equal to given value.
+  """
   createdAt_not: DateTime
+  """
+  All values that are contained in given list.
+  """
   createdAt_in: [DateTime!]
+  """
+  All values that are not contained in given list.
+  """
   createdAt_not_in: [DateTime!]
+  """
+  All values less than the given value.
+  """
   createdAt_lt: DateTime
+  """
+  All values less than or equal the given value.
+  """
   createdAt_lte: DateTime
+  """
+  All values greater than the given value.
+  """
   createdAt_gt: DateTime
+  """
+  All values greater than or equal the given value.
+  """
   createdAt_gte: DateTime
   updatedAt: DateTime
+  """
+  All values that are not equal to given value.
+  """
   updatedAt_not: DateTime
+  """
+  All values that are contained in given list.
+  """
   updatedAt_in: [DateTime!]
+  """
+  All values that are not contained in given list.
+  """
   updatedAt_not_in: [DateTime!]
+  """
+  All values less than the given value.
+  """
   updatedAt_lt: DateTime
+  """
+  All values less than or equal the given value.
+  """
   updatedAt_lte: DateTime
+  """
+  All values greater than the given value.
+  """
   updatedAt_gt: DateTime
+  """
+  All values greater than or equal the given value.
+  """
   updatedAt_gte: DateTime
-  isPublished: Boolean
-  isPublished_not: Boolean
+  published: Boolean
+  """
+  All values that are not equal to given value.
+  """
+  published_not: Boolean
   title: String
+  """
+  All values that are not equal to given value.
+  """
   title_not: String
+  """
+  All values that are contained in given list.
+  """
   title_in: [String!]
+  """
+  All values that are not contained in given list.
+  """
   title_not_in: [String!]
+  """
+  All values less than the given value.
+  """
   title_lt: String
+  """
+  All values less than or equal the given value.
+  """
   title_lte: String
+  """
+  All values greater than the given value.
+  """
   title_gt: String
+  """
+  All values greater than or equal the given value.
+  """
   title_gte: String
+  """
+  All values containing the given string.
+  """
   title_contains: String
+  """
+  All values not containing the given string.
+  """
   title_not_contains: String
+  """
+  All values starting with the given string.
+  """
   title_starts_with: String
+  """
+  All values not starting with the given string.
+  """
   title_not_starts_with: String
+  """
+  All values ending with the given string.
+  """
   title_ends_with: String
+  """
+  All values not ending with the given string.
+  """
   title_not_ends_with: String
-  text: String
-  text_not: String
-  text_in: [String!]
-  text_not_in: [String!]
-  text_lt: String
-  text_lte: String
-  text_gt: String
-  text_gte: String
-  text_contains: String
-  text_not_contains: String
-  text_starts_with: String
-  text_not_starts_with: String
-  text_ends_with: String
-  text_not_ends_with: String
-  author: UserWhereInput
+  body: String
+  """
+  All values that are not equal to given value.
+  """
+  body_not: String
+  """
+  All values that are contained in given list.
+  """
+  body_in: [String!]
+  """
+  All values that are not contained in given list.
+  """
+  body_not_in: [String!]
+  """
+  All values less than the given value.
+  """
+  body_lt: String
+  """
+  All values less than or equal the given value.
+  """
+  body_lte: String
+  """
+  All values greater than the given value.
+  """
+  body_gt: String
+  """
+  All values greater than or equal the given value.
+  """
+  body_gte: String
+  """
+  All values containing the given string.
+  """
+  body_contains: String
+  """
+  All values not containing the given string.
+  """
+  body_not_contains: String
+  """
+  All values starting with the given string.
+  """
+  body_starts_with: String
+  """
+  All values not starting with the given string.
+  """
+  body_not_starts_with: String
+  """
+  All values ending with the given string.
+  """
+  body_ends_with: String
+  """
+  All values not ending with the given string.
+  """
+  body_not_ends_with: String
 }
 
 input PostWhereUniqueInput {
@@ -251,185 +424,17 @@ input PostWhereUniqueInput {
 
 type Query {
   posts(where: PostWhereInput, orderBy: PostOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Post]!
-  users(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User]!
   post(where: PostWhereUniqueInput!): Post
-  user(where: UserWhereUniqueInput!): User
   postsConnection(where: PostWhereInput, orderBy: PostOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): PostConnection!
-  usersConnection(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): UserConnection!
-  node(id: ID!): Node
+  """
+  Fetches an object given its ID
+  """
+  node("""
+  The ID of an object
+  """
+  id: ID!): Node
 }
 
 type Subscription {
   post(where: PostSubscriptionWhereInput): PostSubscriptionPayload
-  user(where: UserSubscriptionWhereInput): UserSubscriptionPayload
-}
-
-type UserConnection {
-  pageInfo: PageInfo!
-  edges: [UserEdge]!
-  aggregate: AggregateUser!
-}
-
-input UserCreateInput {
-  email: String!
-  password: String!
-  name: String!
-  posts: PostCreateManyWithoutAuthorInput
-}
-
-input UserCreateOneWithoutPostsInput {
-  create: UserCreateWithoutPostsInput
-  connect: UserWhereUniqueInput
-}
-
-input UserCreateWithoutPostsInput {
-  email: String!
-  password: String!
-  name: String!
-}
-
-type UserEdge {
-  node: User!
-  cursor: String!
-}
-
-enum UserOrderByInput {
-  id_ASC
-  id_DESC
-  email_ASC
-  email_DESC
-  password_ASC
-  password_DESC
-  name_ASC
-  name_DESC
-  updatedAt_ASC
-  updatedAt_DESC
-  createdAt_ASC
-  createdAt_DESC
-}
-
-type UserPreviousValues {
-  id: ID!
-  email: String!
-  password: String!
-  name: String!
-}
-
-type UserSubscriptionPayload {
-  mutation: MutationType!
-  node: User
-  updatedFields: [String!]
-  previousValues: UserPreviousValues
-}
-
-input UserSubscriptionWhereInput {
-  AND: [UserSubscriptionWhereInput!]
-  OR: [UserSubscriptionWhereInput!]
-  mutation_in: [MutationType!]
-  updatedFields_contains: String
-  updatedFields_contains_every: [String!]
-  updatedFields_contains_some: [String!]
-  node: UserWhereInput
-}
-
-input UserUpdateInput {
-  email: String
-  password: String
-  name: String
-  posts: PostUpdateManyWithoutAuthorInput
-}
-
-input UserUpdateOneWithoutPostsInput {
-  create: UserCreateWithoutPostsInput
-  connect: UserWhereUniqueInput
-  disconnect: UserWhereUniqueInput
-  delete: UserWhereUniqueInput
-  update: UserUpdateWithoutPostsInput
-  upsert: UserUpsertWithoutPostsInput
-}
-
-input UserUpdateWithoutPostsDataInput {
-  email: String
-  password: String
-  name: String
-}
-
-input UserUpdateWithoutPostsInput {
-  where: UserWhereUniqueInput!
-  data: UserUpdateWithoutPostsDataInput!
-}
-
-input UserUpsertWithoutPostsInput {
-  where: UserWhereUniqueInput!
-  update: UserUpdateWithoutPostsDataInput!
-  create: UserCreateWithoutPostsInput!
-}
-
-input UserWhereInput {
-  AND: [UserWhereInput!]
-  OR: [UserWhereInput!]
-  id: ID
-  id_not: ID
-  id_in: [ID!]
-  id_not_in: [ID!]
-  id_lt: ID
-  id_lte: ID
-  id_gt: ID
-  id_gte: ID
-  id_contains: ID
-  id_not_contains: ID
-  id_starts_with: ID
-  id_not_starts_with: ID
-  id_ends_with: ID
-  id_not_ends_with: ID
-  email: String
-  email_not: String
-  email_in: [String!]
-  email_not_in: [String!]
-  email_lt: String
-  email_lte: String
-  email_gt: String
-  email_gte: String
-  email_contains: String
-  email_not_contains: String
-  email_starts_with: String
-  email_not_starts_with: String
-  email_ends_with: String
-  email_not_ends_with: String
-  password: String
-  password_not: String
-  password_in: [String!]
-  password_not_in: [String!]
-  password_lt: String
-  password_lte: String
-  password_gt: String
-  password_gte: String
-  password_contains: String
-  password_not_contains: String
-  password_starts_with: String
-  password_not_starts_with: String
-  password_ends_with: String
-  password_not_ends_with: String
-  name: String
-  name_not: String
-  name_in: [String!]
-  name_not_in: [String!]
-  name_lt: String
-  name_lte: String
-  name_gt: String
-  name_gte: String
-  name_contains: String
-  name_not_contains: String
-  name_starts_with: String
-  name_not_starts_with: String
-  name_ends_with: String
-  name_not_ends_with: String
-  posts_every: PostWhereInput
-  posts_some: PostWhereInput
-  posts_none: PostWhereInput
-}
-
-input UserWhereUniqueInput {
-  id: ID
-  email: String
 }

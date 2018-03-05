@@ -1,17 +1,37 @@
+# type Query {
+#   feed: [Post!]!
+#   drafts: [Post!]!
+#   post(id: ID!): Post!
+#   me: User
+# }
+
+# type Mutation {
+#   signup(email: String!, password: String!, name: String!): AuthPayload!
+#   login(email: String!, password: String!): AuthPayload!
+#   createDraft(title: String!, text: String!): Post!
+#   publish(id: ID!): Post!
+#   deletePost(id: ID!): Post!
+# }
+
+# type AuthPayload {
+#   token: String!
+#   user: User!
+# }
+
 type Post {
   id: ID! @unique
   createdAt: DateTime!
   updatedAt: DateTime!
-  isPublished: Boolean! @default(value: "false")
+  published: Boolean! @default(value: "false")
   title: String!
-  text: String!
-  author: User!
+  body: String!
+  # author: User!
 }
 
-type User {
-  id: ID! @unique
-  email: String! @unique
-  password: String!
-  name: String!
-  posts: [Post!]!
-}
+# type User {
+#   id: ID! @unique
+#   email: String! @unique
+#   password: String!
+#   name: String!
+#   posts: [Post!]!
+# }
