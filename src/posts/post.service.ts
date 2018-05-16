@@ -1,39 +1,38 @@
-import { Component } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post } from './post.entity';
 import { IPost } from './post.interface';
 
-@Component()
+@Injectable()
 export class PostService {
   constructor(
-    @InjectRepository(Post)
-    private readonly postRepo: Repository<Post>,
+    @InjectRepository(Post) private readonly postRepo: Repository<Post>,
   ) {}
 
   public async all(): Promise<Post[]> {
     return await this.postRepo.find();
   }
 
-  public async one(id: string): Promise<Post> {
-    return await this.postRepo.findOne({ id });
+  public async one(args: IPost): Promise<Post> {
+    return await this.postRepo.findOne(args.where.slug);
   }
 
-  public async createOne(args: Post): Promise<Post> {
+  public async create(args: IPost): Promise<Post> {
     const post = new Post();
-    post.title = args.title;
-    post.body = args.body;
-    post.published = args.published;
+    post.title = args.data.title;
+    post.slug = args.data.slug;
+    post.body = args.data.body;
+    post.published = args.data.published;
+
     return await this.postRepo.save(post);
-    // return await this.postRepo.create(args);
   }
 
-  // public async update(id: Partial<Post>, args: DeepPartial<Post>): Promise<Post> {
-  //   return await this.postRepo.update(id, { args });
+  // public async update(args: IPost): Promise<Post> {
+  //   return await this.postRepo.update(args.where.slug, args.data);
   // }
 
-  // public async delete(id: string): Promise<void> {
-  //   return await this.postRepo.deleteById(id);
+  // public async delete(args: IPost): Promise<Post> {
+  //   return await this.postRepo.deleteById(args.where.slug);
   // }
-
 }
